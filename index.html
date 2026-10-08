@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d5fe0">
+<title>SplitShare</title>
+<style>
+:root{--blue:#1d5fe0;--blue-d:#1648b0;--navy:#0a2a5e;--sky:#eaf2ff;--line:#d6e3fa;--muted:#5a6f94;--green:#12a150;--warn:#e5532d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sky);color:var(--navy);font:15px/1.5 Inter,Roboto,"Segoe UI",system-ui,sans-serif}
+h1,h2{margin:0;color:var(--navy)}h1{font-size:1.6rem}h2{font-size:1.05rem;margin-bottom:12px}
+button,input,select{font:inherit}
+input,select{width:100%;padding:11px 12px;color:var(--navy);background:#f7faff;border:1.5px solid var(--line);border-radius:12px}
+input:focus,select:focus,button:focus-visible{outline:3px solid #9cc0ff;outline-offset:1px}
+label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+.btn{border:0;border-radius:12px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--blue);color:#fff}
+.btn:hover{background:var(--blue-d)}.btn:disabled{opacity:.5}
+.btn.o{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}.btn.o:hover{background:var(--sky)}
+.btn.big{width:100%;padding:14px}.btn.sm{padding:6px 12px;font-size:.85rem}
+.lnk{background:none;border:0;color:var(--blue);cursor:pointer;padding:2px 0;font-weight:600}.lnk:hover{text-decoration:underline}
+.lnk.red{color:var(--warn)}
+.muted{color:var(--muted)}
+.top{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.bar{max-width:1060px;margin:auto;display:flex;align-items:center;gap:12px;padding:12px 16px}
+.brand{font-size:1.25rem;font-weight:800;color:var(--blue);margin-right:auto}
+.dnav{display:none;gap:4px}.dnav button{background:none;border:0;padding:8px 12px;border-radius:10px;color:var(--muted);font-weight:600;cursor:pointer}
+.dnav button.on{background:var(--sky);color:var(--blue)}
+.page{max-width:1060px;margin:0 auto;padding:18px 16px 110px}
+.card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 4px 16px rgba(10,42,94,.08);margin-bottom:16px}
+.two{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.two{grid-template-columns:380px 1fr}}
+.stats{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);margin:16px 0}
+@media(min-width:720px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 16px rgba(10,42,94,.08);text-align:left;border:0;cursor:pointer;color:var(--navy)}
+.stat small{display:block;color:var(--muted)}.stat b{font-size:1.25rem}
+.stat.p{background:var(--blue);color:#fff}.stat.p small{color:#cfe0ff}
+.list{display:grid;gap:8px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.item small{display:block;color:var(--muted)}.item.click{cursor:pointer;text-align:left;width:100%;color:var(--navy)}
+.item.click:hover{background:var(--sky)}
+.badge{font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.b-settled{background:#dcf5e7;color:#0b7a3b}.b-pending{background:#ffe9e1;color:#b6401f}.b-empty{background:#e8eefb;color:var(--muted)}
+.rec{color:var(--green);font-weight:700}.pay{color:var(--warn);font-weight:700}
+.row{display:flex;gap:8px}.row>*{flex:1}.row>.btn{flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--sky);border-radius:999px;padding:4px 6px 4px 4px}
+.chip button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:0 6px}
+.av{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;background:var(--blue);color:#fff;font-size:.8rem;font-weight:700;flex:none}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{margin:0;display:flex;gap:6px;align-items:center;color:var(--navy);background:#f7faff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer;width:auto}
+.checks input{width:auto}.checks label:has(input:checked){border-color:var(--blue);background:var(--sky)}
+.amt{position:relative}.amt span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}.amt input{padding-left:28px}
+.err{color:var(--warn);font-size:.85rem;min-height:1.2em;margin:6px 0}
+.note{background:#fff7e0;border:1px solid #ffd978;color:#6b4b00;border-radius:14px;padding:10px 14px;margin-bottom:14px}
+.settle{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;border-radius:14px;background:var(--sky)}
+.settle.done{opacity:.65}.settle .a{margin-left:auto;font-weight:800}
+.thead{margin-bottom:14px}.trow{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
+.tname{font-size:1.3rem;font-weight:800;flex:1;min-width:180px;background:#fff}.trow input[type=date]{width:auto}
+.empty{color:var(--muted);padding:6px 0}
+.auth{min-height:100vh;display:grid;place-items:center;padding:16px}
+.acard{background:#fff;border-radius:22px;padding:26px;width:100%;max-width:430px;box-shadow:0 10px 30px rgba(10,42,94,.12)}
+.logo{font-size:1.7rem;font-weight:800;color:var(--blue)}
+.or{text-align:center;color:var(--muted);font-size:.85rem;margin:14px 0 10px}
+.tabs{display:flex;background:var(--sky);border-radius:12px;padding:4px;margin-bottom:6px}
+.tabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-weight:700;color:var(--muted);cursor:pointer}
+.tabs button.on{background:#fff;color:var(--blue);box-shadow:0 1px 4px rgba(10,42,94,.15)}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;align-items:flex-end;background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.bnav button{flex:1;background:none;border:0;color:var(--muted);font-size:.72rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0}
+.bnav button i{font-style:normal;font-size:1.3rem}.bnav button.on{color:var(--blue)}
+.bnav .plus i{background:var(--blue);color:#fff;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:2rem;margin-top:-26px;box-shadow:0 6px 14px rgba(29,95,224,.45);border:4px solid #fff}
+.bnav .plus{color:var(--blue)}
+@media(min-width:720px){.bnav{display:none}.dnav{display:flex}.page{padding-bottom:40px}}
+dialog{border:0;border-radius:20px;padding:20px;width:min(520px,94vw);box-shadow:0 20px 50px rgba(10,42,94,.3);color:var(--navy)}
+dialog::backdrop{background:rgba(10,42,94,.45)}
+dialog pre{background:var(--sky);border-radius:12px;padding:12px;white-space:pre-wrap;font:inherit;font-size:.9rem;max-height:34vh;overflow:auto}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.dh button{border:0;background:none;font-size:1.6rem;cursor:pointer;color:var(--muted)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btns .btn{flex:1}
+.toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,120px);background:var(--navy);color:#fff;padding:11px 18px;border-radius:12px;transition:transform .25s;z-index:20}
+.toast.on{transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<dialog id="dlg"></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const today=()=>new Date().toISOString().slice(0,10);
+
+/* ===== SplitCore: pure calculation logic, no DOM, no storage. =====
+   The same logic is reused unchanged by the Android build (Capacitor wraps this page). Money is in paise. */
+const Core={
+ inr:p=>'₹'+(Math.abs(p)/100).toLocaleString('en-IN',{minimumFractionDigits:p%100?2:0,maximumFractionDigits:2}),
+ nm:(t,id)=>(t.members.find(m=>m.id===id)||{name:'Removed'}).name,
+ // Typed amount -> whole paise, read from the text itself (no floating point). Accepts 250, 250.5, 1,250.75.
+ // Returns null for anything else: letters, 3+ decimals, zero, negative, or above ₹1,00,00,000.
+ toPaise(s){
+  const m=/^(\d{1,8})(?:\.(\d{1,2}))?$/.exec(String(s||'').replace(/[,\s₹]/g,''));
+  if(!m)return null;
+  const p=+m[1]*100+(m[2]?+m[2].padEnd(2,'0'):0);
+  return p>0&&p<=1e9?p:null;
+ },
+ // Split `amount` paise among n people in whole paise. The parts always add up exactly to `amount`.
+ // Leftover paise go to a rotating set of people (seeded by the expense) so nobody is always the one who pays extra.
+ split(amount,n,seed){
+  const b=Math.floor(amount/n),r=amount-b*n;
+  return Array.from({length:n},(_,k)=>b+(((k-seed)%n+n)%n<r?1:0));
+ },
+ compute(t){
+  const net={},paid={},owe={};let total=0;
+  t.members.forEach(m=>{net[m.id]=0;paid[m.id]=0;owe[m.id]=0});
+  t.expenses.forEach(e=>{
+   const ids=e.sharers.filter(i=>i in net);
+   if(!ids.length||!(e.payer in net))return;
+   total+=e.amount;
+   const parts=this.split(e.amount,ids.length,[...e.id].reduce((a,c)=>a+c.charCodeAt(0),0)%ids.length);
+   ids.forEach((i,k)=>{owe[i]+=parts[k];net[i]-=parts[k]});
+   paid[e.payer]+=e.amount;net[e.payer]+=e.amount;
+  });
+  // Payments already made between people reduce what is still owed.
+  (t.payments||[]).forEach(p=>{if(p.from in net&&p.to in net){net[p.from]+=p.amt;net[p.to]-=p.amt}});
+  const cr=[],db=[],tx=[];
+  Object.keys(net).forEach(i=>{net[i]>0?cr.push({i,v:net[i]}):net[i]<0&&db.push({i,v:-net[i]})});
+  while(cr.length&&db.length){ // biggest debtor pays biggest creditor: keeps the number of payments low
+   cr.sort((a,b)=>b.v-a.v||(a.i<b.i?-1:1));db.sort((a,b)=>b.v-a.v||(a.i<b.i?-1:1));
+   const c=cr[0],d=db[0],x=Math.min(c.v,d.v);
+   tx.push({from:d.i,to:c.i,amt:x});c.v-=x;d.v-=x;
+   if(!c.v)cr.shift();if(!d.v)db.shift();
+  }
+  const sumOwe=Object.values(owe).reduce((a,b)=>a+b,0);
+  return{net,paid,owe,total,tx,sumOwe};
+ },
+ status(t){const c=this.compute(t);return !t.expenses.length?'empty':c.tx.length?'pending':'settled'},
+ summary(t){
+  const c=this.compute(t),f=this.inr,n=id=>this.nm(t,id),pays=t.payments||[];
+  return `SplitShare – ${t.name}\n\nParticipants: ${t.members.map(m=>m.name).join(', ')}\nTotal Expense: ${f(c.total)}\n\n`
+  +t.members.filter(m=>c.paid[m.id]).map(m=>`${m.name} paid: ${f(c.paid[m.id])}`).join('\n')
+  +`\n\nEach person's share:\n`+t.members.map(m=>`${m.name}: ${f(c.owe[m.id])}`).join('\n')
+  +`\n\nFinal Settlement:\n`+(c.tx.length?c.tx.map(x=>`${n(x.from)} pays ${n(x.to)} ${f(x.amt)}`).join('\n'):'All settled up 🎉')
+  +(pays.length?`\n\nAlready settled:\n`+pays.map(q=>`${n(q.from)} paid ${n(q.to)} ${f(q.amt)}`).join('\n'):'');
+ }
+};
+
+/* ===== Data layer: one interface, swappable backend. =====
+   LocalDB below is a DEMO backend (data stays in this browser). For production, replace it with a Supabase
+   implementation of the same 7 methods (auth.signUp/signInWithPassword/resetPasswordForEmail, and trips
+   tables). Schema + row-level security is in supabase-schema.sql. Only the public anon key goes in the app. */
+const LocalDB=(()=>{
+ const R=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
+ const W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+ const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+ const hash=async(pw,salt)=>{
+  if(!window.crypto||!crypto.subtle)throw Error('Secure browser context needed. Open via https or localhost.');
+  const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);
+  return b64(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',iterations:150000,salt:Uint8Array.from(atob(salt),c=>c.charCodeAt(0))},k,256));
+ };
+ const pub=u=>u&&{id:u.id,first:u.first,last:u.last,mobile:u.mobile,email:u.email};
+ const users=()=>R('ss_users',[]),me=()=>R('ss_sess',null);
+ const newSalt=()=>b64(crypto.getRandomValues(new Uint8Array(16)));
+ return{
+  async register(p){
+   const us=users();if(us.some(u=>u.email===p.email.toLowerCase()))throw Error('An account with this email already exists.');
+   const salt=newSalt(),u={id:uid(),first:p.first,last:p.last,mobile:p.mobile,email:p.email.toLowerCase(),salt,hash:await hash(p.password,salt)};
+   us.push(u);W('ss_users',us);W('ss_sess',u.id);return pub(u);
+  },
+  async login(email,pw){
+   const u=users().find(x=>x.email===email.toLowerCase());
+   if(!u||u.hash!==await hash(pw,u.salt))throw Error('Email or password is incorrect.');
+   W('ss_sess',u.id);return pub(u);
+  },
+  async resetPassword(email,mobile,pw){ // demo only. Production: emailed reset link.
+   const us=users(),u=us.find(x=>x.email===email.toLowerCase()&&x.mobile===mobile);
+   if(!u)throw Error('No account matches that email and mobile number.');
+   u.salt=newSalt();u.hash=await hash(pw,u.salt);W('ss_users',us);
+  },
+  async session(){return pub(users().find(u=>u.id===me()))},
+  async logout(){localStorage.removeItem('ss_sess')},
+  async updateProfile(p){
+   const us=users(),u=us.find(x=>x.id===me());if(!u)throw Error('Please log in again.');
+   if(us.some(x=>x.id!==u.id&&x.email===p.email.toLowerCase()))throw Error('That email is used by another account.');
+   Object.assign(u,{first:p.first,last:p.last,mobile:p.mobile,email:p.email.toLowerCase()});W('ss_users',us);return pub(u);
+  },
+  async listTrips(){const o=me();return R('ss_trips',[]).filter(t=>t.owner===o).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id))},
+  async saveTrip(t){
+   const o=me();if(!o||t.owner!==o)throw Error('Not allowed.'); // a user can only write their own trips
+   const all=R('ss_trips',[]),i=all.findIndex(x=>x.id===t.id);
+   if(i>=0){if(all[i].owner!==o)throw Error('Not allowed.');all[i]=t}else all.push(t);W('ss_trips',all);
+  },
+  async deleteTrip(id){const o=me();W('ss_trips',R('ss_trips',[]).filter(t=>!(t.id===id&&t.owner===o)))}
+ };
+})();
+const DB=LocalDB;
+
+/* ===== UI ===== */
+const S={user:null,guest:false,view:'auth',tab:'login',trips:[],cur:null,edit:false};
+const avt=n=>`<span class="av">${esc((n||'?')[0].toUpperCase())}</span>`;
+const fdate=d=>new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const badge=t=>{const s=Core.status(t);return `<span class="badge b-${s}">${s==='settled'?'Settled':s==='pending'?'Pending':'No expenses'}</span>`};
+let tt;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2400)};
+
+async function commit(t,redraw=true){
+ if(S.guest)sessionStorage.setItem('ss_guest',JSON.stringify(t));
+ else{await DB.saveTrip(t);if(!S.trips.some(x=>x.id===t.id))S.trips.unshift(t)}
+ if(redraw)render();
+}
+const newTrip=owner=>({id:uid(),owner,name:owner?'New trip':'My trip',date:today(),members:owner&&S.user?[{id:uid(),name:S.user.first,self:true}]:[],expenses:[],payments:[]});
+// Older trips created before this fix: make sure the logged-in user is in the participant list.
+const ensureSelf=t=>{
+ if(S.guest||!S.user||t.members.some(m=>m.self))return false;
+ const m=t.members.find(x=>x.name.toLowerCase()===S.user.first.toLowerCase());
+ m?m.self=true:t.members.unshift({id:uid(),name:S.user.first,self:true});return true;
+};
+const norm=t=>{ // older saved trips used a 'settled' map; convert it to payment records
+ t.payments=t.payments||[];
+ if(t.settled){Object.entries(t.settled).forEach(([k,a])=>{const[from,to]=k.split('>');t.payments.push({id:uid(),from,to,amt:a,date:today()})});delete t.settled}
+ return t;
+};
+const findTrip=id=>S.cur&&S.cur.id===id?S.cur:S.trips.find(t=>t.id===id);
+const tripCard=t=>{const c=Core.compute(t);return `<button class="item click" data-a="open" data-id="${t.id}"><div><b>${esc(t.name)}</b><small>${fdate(t.date)} · ${t.members.length} people · ${Core.inr(c.total)}</small></div>${badge(t)}</button>`};
+
+function authView(){
+ const T=S.tab,on=k=>T===k?'on':'';
+ const forms={
+  login:`<form id="fLogin"><label>Email</label><input name="email" type="email" autocomplete="email" required>
+   <label>Password</label><input name="password" type="password" autocomplete="current-password" required>
+   <div class="err"></div><button class="btn big">Login</button><p><button type="button" class="lnk" data-a="tab" data-id="forgot">Forgot password?</button></p></form>`,
+  register:`<form id="fReg"><div class="row"><div><label>First name</label><input name="first" autocomplete="given-name" required></div><div><label>Last name</label><input name="last" autocomplete="family-name" required></div></div>
+   <label>Mobile number</label><input name="mobile" type="tel" autocomplete="tel" placeholder="9876543210" required>
+   <label>Email address</label><input name="email" type="email" autocomplete="email" required>
+   <label>Password (8+ characters)</label><input name="password" type="password" autocomplete="new-password" required>
+   <label>Confirm password</label><input name="confirm" type="password" autocomplete="new-password" required>
+   <div class="err"></div><button class="btn big">Create account</button></form>`,
+  forgot:`<form id="fForgot"><p class="muted">Demo reset: confirm the email and mobile you registered with. With the live backend this sends a reset link to your email.</p>
+   <label>Email</label><input name="email" type="email" required><label>Registered mobile</label><input name="mobile" type="tel" required>
+   <label>New password</label><input name="password" type="password" autocomplete="new-password" required>
+   <div class="err"></div><button class="btn big">Reset password</button><p><button type="button" class="lnk" data-a="tab" data-id="login">Back to login</button></p></form>`
+ };
+ return `<div class="auth"><div class="acard"><div class="logo">SplitShare</div><p class="muted" style="margin:2px 0 16px">Split trip costs fairly and settle up in ₹.</p>
+  <button class="btn o big" data-a="guest">Continue as Guest</button>
+  <div class="or">or sign in to save your trips</div>
+  ${T==='forgot'?'':`<div class="tabs"><button class="${on('login')}" data-a="tab" data-id="login">Login</button><button class="${on('register')}" data-a="tab" data-id="register">Register</button></div>`}
+  ${forms[T]}</div></div>`;
+}
+
+function homeView(){
+ const cs=S.trips.map(t=>Core.compute(t)),total=cs.reduce((a,c)=>a+c.total,0);
+ const pend=cs.flatMap(c=>c.tx);
+ return `<h1>Welcome, ${esc(S.user.first)}</h1><p class="muted" style="margin:2px 0">Here's where your trips stand.</p>
+ <div class="stats">
+  <button class="stat p" data-a="newTrip"><small>New Trip</small><b>＋ Start</b></button>
+  <button class="stat" data-a="go" data-id="trips"><small>My Trips</small><b>${S.trips.length}</b></button>
+  <button class="stat" data-a="go" data-id="settle"><small>Settlements pending</small><b>${pend.length} · ${Core.inr(pend.reduce((a,x)=>a+x.amt,0))}</b></button>
+  <div class="stat" style="cursor:default"><small>Total Expenses</small><b>${Core.inr(total)}</b></div></div>
+ <div class="card"><h2>Recent trips</h2><div class="list">${S.trips.slice(0,3).map(tripCard).join('')||'<div class="empty">No trips yet. Tap New Trip to start.</div>'}</div></div>`;
+}
+const tripsView=()=>`<h1>My Trips</h1><div class="list" style="margin-top:14px">${S.trips.map(tripCard).join('')||'<div class="card empty">No trips yet. Tap + Add to create your first one.</div>'}</div>`;
+
+function settleView(){
+ const pend=S.trips.flatMap(t=>Core.compute(t).tx.map(x=>({t,x}))),done=S.trips.flatMap(t=>(t.payments||[]).map(p=>({t,p})));
+ const bt=(cls,a,attrs,l)=>`<button class="btn sm ${cls}" data-a="${a}" ${attrs}>${l}</button>`;
+ const pr=({t,x})=>`<div class="item"><div><b>${esc(Core.nm(t,x.from))} → ${esc(Core.nm(t,x.to))}: ${Core.inr(x.amt)}</b><small>${esc(t.name)}</small></div>${bt('','settle',`data-t="${t.id}" data-f="${x.from}" data-to="${x.to}" data-m="${x.amt}"`,'Mark settled')}</div>`;
+ const dr=({t,p})=>`<div class="item"><div><b>${esc(Core.nm(t,p.from))} → ${esc(Core.nm(t,p.to))}: ${Core.inr(p.amt)}</b><small>${esc(t.name)} · settled ${esc(p.date)}</small></div>${bt('o','undo',`data-t="${t.id}" data-id="${p.id}"`,'Undo')}</div>`;
+ return `<h1>Settlements</h1><div class="card" style="margin-top:14px"><h2>Pending (${pend.length})</h2><div class="list">${pend.map(pr).join('')||'<div class="empty">Nothing pending. 🎉</div>'}</div></div>
+ <div class="card"><h2>Completed (${done.length})</h2><div class="list">${done.map(dr).join('')||'<div class="empty">No completed settlements yet.</div>'}</div></div>`;
+}
+
+function profileView(){
+ const u=S.user;
+ return `<h1>Profile</h1><div class="card" style="margin-top:14px">
+ ${S.edit?`<form id="fProf"><div class="row"><div><label>First name</label><input name="first" value="${esc(u.first)}" required></div><div><label>Last name</label><input name="last" value="${esc(u.last)}" required></div></div>
+  <label>Mobile number</label><input name="mobile" type="tel" value="${esc(u.mobile)}" required><label>Email address</label><input name="email" type="email" value="${esc(u.email)}" required>
+  <div class="err"></div><div class="btns"><button class="btn">Save changes</button><button type="button" class="btn o" data-a="editP">Cancel</button></div></form>`
+ :`<div style="display:flex;gap:14px;align-items:center"><span class="av" style="width:56px;height:56px;font-size:1.4rem">${esc(u.first[0].toUpperCase())}</span><div><b style="font-size:1.15rem">${esc(u.first)} ${esc(u.last)}</b><div class="muted">${esc(u.email)}<br>${esc(u.mobile)}</div></div></div>
+  <div class="btns"><button class="btn" data-a="editP">Edit profile</button><button class="btn o" data-a="logout">Logout</button></div>`}</div>
+ <p class="muted">Your mobile and email are only used to pre-fill sharing. Nothing is sent without your confirmation.</p>`;
+}
+
+function tripView(t){
+ const c=Core.compute(t),M=t.members,g=S.guest,f=Core.inr;
+ const bal=M.map(m=>{const n=c.net[m.id];return `<div class="item"><div style="display:flex;gap:10px;align-items:center">${avt(m.name)}<div><b>${esc(m.name)}</b><small>Paid ${f(c.paid[m.id])} · Share ${f(c.owe[m.id])}</small></div></div>
+  <span class="${n>0?'rec':n<0?'pay':'muted'}">${n>0?'Receives '+f(n):n<0?'Pays '+f(n):'Settled'}</span></div>`}).join('');
+ const sets=c.tx.map(x=>`<div class="settle">${avt(Core.nm(t,x.from))}<span><b>${esc(Core.nm(t,x.from))}</b> pays <b>${esc(Core.nm(t,x.to))}</b></span><span class="a">${f(x.amt)}</span>
+  <button class="btn sm" data-a="settle" data-t="${t.id}" data-f="${x.from}" data-to="${x.to}" data-m="${x.amt}">Mark settled</button></div>`).join('');
+ const payl=t.payments.length?`<h2 style="margin-top:18px">Payments recorded</h2><div class="list">${t.payments.map(p=>`<div class="settle done">${avt(Core.nm(t,p.from))}<span><b>${esc(Core.nm(t,p.from))}</b> paid <b>${esc(Core.nm(t,p.to))}</b> ✓</span><span class="a">${f(p.amt)}</span>
+  <button class="btn sm o" data-a="undo" data-t="${t.id}" data-id="${p.id}">Undo</button></div>`).join('')}</div>`:'';
+ const hist=t.expenses.slice().reverse().map(e=>`<div class="item"><div><b>${esc(e.desc)}</b><small>${esc(Core.nm(t,e.payer))} paid · split among ${esc(e.sharers.map(i=>Core.nm(t,i)).join(', '))} · ${e.amount%e.sharers.length?'about ':''}${f(Math.floor(e.amount/e.sharers.length))} each · ${esc(e.date)}</small></div>
+  <div style="display:flex;align-items:center;gap:4px"><b>${f(e.amount)}</b><button class="lnk red" data-a="delExp" data-id="${e.id}" aria-label="Delete ${esc(e.desc)}">🗑</button></div></div>`).join('');
+ return `${g?`<div class="note">Guest mode: Your data is temporary and will not be saved. Create an account to save your trips. <button class="lnk" data-a="toReg">Create account</button></div>`:''}
+ <div class="thead">${g?'':'<button class="lnk" data-a="go" data-id="trips">← My Trips</button>'}
+  <div class="trow"><input id="tname" class="tname" value="${esc(t.name)}" maxlength="40" aria-label="Trip name"><input id="tdate" type="date" value="${esc(t.date)}" aria-label="Trip date"></div>
+  <small class="muted">${g?'Temporary trip':'✓ Saved to your account'} · ${badge(t)}</small></div>
+ <div class="two"><div>
+  <div class="card"><h2>Participants</h2><form id="fMem" class="row"><input name="n" placeholder="Friend's name" maxlength="30" aria-label="Participant name"><button class="btn">Add</button></form><div class="err" id="mErr"></div>
+   <div class="chips">${M.map(m=>`<span class="chip">${avt(m.name)}${esc(m.name)}${m.self?' <small class="muted">(You)</small>&nbsp;':`<button data-a="rmMem" data-id="${m.id}" aria-label="Remove ${esc(m.name)}">×</button>`}</span>`).join('')||'<span class="empty">Add at least two people.</span>'}</div></div>
+  <div class="card"><h2>Add expense</h2><form id="expForm">
+   <label>What was it for?</label><input id="desc" name="desc" placeholder="e.g. Dinner at beach shack" maxlength="60">
+   <label>Total amount</label><div class="amt"><span>₹</span><input id="amount" name="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00"></div>
+   <label>Who paid?</label><select id="payer" name="payer">${M.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')||'<option value="">Add people first</option>'}</select>
+   <label>Who shared it? <button type="button" class="lnk" data-a="selAll">All</button> · <button type="button" class="lnk" data-a="selNone">None</button></label>
+   <div class="checks">${M.map(m=>`<label><input type="checkbox" name="sh" value="${m.id}" checked>${esc(m.name)}</label>`).join('')}</div>
+   <div class="err" id="eErr"></div><button class="btn big">Add expense</button></form></div>
+ </div><div>
+  <div class="card"><h2>Balances</h2><div class="stats" style="grid-template-columns:repeat(3,1fr);margin-top:0">
+    <div class="stat p"><small>Total spent</small><b>${f(c.total)}</b></div><div class="stat" style="cursor:default"><small>Expenses</small><b>${t.expenses.length}</b></div>
+    <div class="stat" style="cursor:default"><small>Payments needed</small><b>${c.tx.length}</b></div></div>
+   <div class="list">${bal||'<div class="empty">Balances appear once you add people.</div>'}</div>
+   ${t.expenses.length?`<p class="muted" style="margin:8px 0 0;font-size:.85rem">${c.sumOwe===c.total?'✓ Everyone\'s shares add up to the total spent.':'⚠ Shares do not add up to the total. Check the expenses.'}</p>`:''}
+   <h2 style="margin-top:18px">Final settlement</h2><div class="list">${sets||`<div class="empty">${t.expenses.length?'🎉 Everyone is settled up.':'Nothing to settle yet.'}</div>`}</div>
+   ${payl}<div class="btns"><button class="btn" data-a="share" ${t.expenses.length?'':'disabled'}>Share summary</button></div></div>
+  <div class="card"><h2>Expense history</h2><div class="list">${hist||'<div class="empty">No expenses yet.</div>'}</div>
+   <p style="margin:12px 0 0"><button class="lnk red" data-a="delTrip">${g?'Start over':'Delete this trip'}</button></p></div>
+ </div></div>`;
+}
+
+function shell(inner){
+ const g=S.guest,v=S.view;
+ const L=g?[['trip','Trip'],['toReg','Create account']]:[['home','Home'],['trips','My Trips'],['settle','Settlements'],['profile','Profile']];
+ const dn=L.map(([k,l])=>`<button class="${v===k?'on':''}" data-a="${k==='toReg'?'toReg':'go'}" data-id="${k}">${l}</button>`).join('');
+ const ico={home:'🏠',trips:'🧳',settle:'✅',profile:'👤',trip:'🧳',toReg:'👤'};
+ const bn=(k,l)=>`<button class="${v===k?'on':''}" data-a="${k==='toReg'?'toReg':'go'}" data-id="${k}"><i>${ico[k]}</i>${l}</button>`;
+ const plus='<button class="plus" data-a="add"><i>+</i>Add</button>';
+ const bottom=g?bn('trip','Trip')+plus+bn('toReg','Sign up'):bn('home','Home')+bn('trips','Trips')+plus+bn('settle','Settlements')+bn('profile','Profile');
+ return `<header class="top"><div class="bar"><span class="brand">SplitShare</span><nav class="dnav">${dn}</nav>
+  ${g?'<button class="btn sm o" data-a="exitGuest">Exit guest</button>':'<button class="btn sm" data-a="newTrip">+ New trip</button>'}</div></header>
+ <main class="page">${inner}</main><nav class="bnav" aria-label="Main">${bottom}</nav>`;
+}
+
+function render(){
+ const draft=S.view==='trip'&&$('#desc')?{d:$('#desc').value,a:$('#amount').value,p:$('#payer').value,off:[...document.querySelectorAll('#expForm input[name=sh]')].filter(i=>!i.checked).map(i=>i.value)}:null;
+ const V={auth:authView,home:homeView,trips:tripsView,settle:settleView,profile:profileView,trip:()=>tripView(S.cur)};
+ $('#root').innerHTML=S.view==='auth'?authView():shell(V[S.view]());
+ if(draft&&$('#desc')){$('#desc').value=draft.d;$('#amount').value=draft.a;if([...$('#payer').options].some(o=>o.value===draft.p))$('#payer').value=draft.p;document.querySelectorAll('#expForm input[name=sh]').forEach(i=>{if(draft.off.includes(i.value))i.checked=false})}
+}
+
+async function enter(){S.trips=(await DB.listTrips()).map(norm);S.guest=false;S.view='home';render()}
+function openShare(){
+ const t=S.cur,u=S.user||{};
+ $('#dlg').innerHTML=`<div class="dh"><b>Share summary</b><button data-a="closeDlg" aria-label="Close">×</button></div><pre>${esc(Core.summary(t))}</pre>
+  <label>WhatsApp number (optional, leave empty to pick a chat)</label><input id="shPh" type="tel" value="${esc(u.mobile||'')}">
+  <label>Email to (optional)</label><input id="shEm" type="email" value="${esc(u.email||'')}">
+  <div class="btns"><button class="btn" data-a="shWa">WhatsApp</button><button class="btn" data-a="shMail">Email</button><button class="btn o" data-a="shCopy">Copy summary</button></div>
+  <p class="muted" style="margin:10px 0 0;font-size:.85rem">Nothing is sent until you confirm in WhatsApp or your email app.</p>`;
+ $('#dlg').showModal();
+}
+async function copy(text){
+ try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);return true}}catch(e){}
+ const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();
+ let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();return ok;
+}
+
+document.addEventListener('click',async e=>{
+ const el=e.target.closest('[data-a]');
+ if(e.target===$('#dlg')){$('#dlg').close();return}
+ if(!el)return;
+ const a=el.dataset.a,id=el.dataset.id,t=S.cur;
+ try{switch(a){
+  case 'tab':S.tab=id;render();break;
+  case 'guest':{S.guest=true;S.user=null;S.cur=newTrip(null);sessionStorage.setItem('ss_guest',JSON.stringify(S.cur));S.view='trip';render();break}
+  case 'exitGuest':sessionStorage.removeItem('ss_guest');Object.assign(S,{guest:false,cur:null,view:'auth',tab:'login'});render();break;
+  case 'toReg':sessionStorage.removeItem('ss_guest');Object.assign(S,{guest:false,cur:null,view:'auth',tab:'register'});render();break;
+  case 'go':S.view=id;S.edit=false;render();scrollTo(0,0);break;
+  case 'newTrip':{const n=newTrip(S.user.id);S.cur=n;await commit(n,false);S.view='trip';render();scrollTo(0,0);break}
+  case 'add':
+   if(S.view==='trip'){const f=$('#expForm');f.scrollIntoView({behavior:'smooth',block:'center'});$('#desc').focus()}
+   else if(S.guest){S.view='trip';render()}
+   else{const n=newTrip(S.user.id);S.cur=n;await commit(n,false);S.view='trip';render();scrollTo(0,0)}break;
+  case 'open':S.cur=S.trips.find(x=>x.id===id);if(ensureSelf(S.cur))await commit(S.cur,false);S.view='trip';render();scrollTo(0,0);break;
+  case 'rmMem':
+   if(t.expenses.some(x=>x.payer===id||x.sharers.includes(id))||t.payments.some(p=>p.from===id||p.to===id)){toast("Delete this person's expenses and payments first");break}
+   t.members=t.members.filter(m=>m.id!==id);await commit(t);break;
+  case 'delExp':t.expenses=t.expenses.filter(x=>x.id!==id);await commit(t);toast('Expense deleted');break;
+  case 'selAll':case 'selNone':document.querySelectorAll('#expForm input[name=sh]').forEach(i=>i.checked=a==='selAll');break;
+  case 'settle':{
+   const tr=findTrip(el.dataset.t),{f,to,m}=el.dataset;if(!tr)break;
+   if(!Core.compute(tr).tx.some(x=>x.from===f&&x.to===to&&x.amt===+m))break; // ignore double taps / stale buttons
+   tr.payments.push({id:uid(),from:f,to,amt:+m,date:new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'})});
+   await commit(tr);toast('Payment recorded');break}
+  case 'undo':{
+   const tr=findTrip(el.dataset.t);if(!tr)break;
+   tr.payments=tr.payments.filter(p=>p.id!==id);await commit(tr);toast('Payment removed');break}
+  case 'delTrip':
+   if(!confirm(S.guest?'Clear this temporary trip?':'Delete this trip permanently?'))break;
+   if(S.guest){S.cur=newTrip(null);await commit(S.cur)}
+   else{await DB.deleteTrip(t.id);S.trips=S.trips.filter(x=>x.id!==t.id);S.view='trips';render()}break;
+  case 'share':openShare();break;
+  case 'closeDlg':$('#dlg').close();break;
+  case 'shCopy':toast(await copy(Core.summary(t))?'Summary copied':'Copy failed. Select the text and copy it.');break;
+  case 'shWa':{let n=$('#shPh').value.replace(/\D/g,'');if(n.length===10)n='91'+n;
+   window.open(`https://wa.me/${n}?text=${encodeURIComponent(Core.summary(t))}`,'_blank','noopener');break}
+  case 'shMail':location.href=`mailto:${encodeURIComponent($('#shEm').value.trim())}?subject=${encodeURIComponent('SplitShare – '+t.name)}&body=${encodeURIComponent(Core.summary(t))}`;break;
+  case 'editP':S.edit=!S.edit;render();break;
+  case 'logout':await DB.logout();Object.assign(S,{user:null,guest:false,view:'auth',tab:'login',trips:[],cur:null,edit:false});render();break;
+ }}catch(x){toast(x.message)}
+});
+
+document.addEventListener('change',async e=>{
+ const t=S.cur;if(!t||S.view!=='trip')return;
+ if(e.target.id==='tname'){t.name=e.target.value.trim()||'Untitled trip';await commit(t,false)}
+ if(e.target.id==='tdate'&&e.target.value){t.date=e.target.value;await commit(t,false)}
+});
+
+const okMob=m=>/^\+?\d{10,13}$/.test(m),okMail=m=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m);
+document.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const f=e.target,id=f.id,v=Object.fromEntries(new FormData(f)),t=S.cur,err=f.querySelector('.err'),fail=m=>{if(err)err.textContent=m};
+ try{
+  if(id==='fLogin'){S.user=await DB.login(v.email.trim(),v.password);await enter()}
+  else if(id==='fReg'){
+   v.mobile=v.mobile.replace(/[\s-]/g,'');v.email=v.email.trim();
+   if(!v.first.trim()||!v.last.trim())return fail('Enter your first and last name.');
+   if(!okMob(v.mobile))return fail('Enter a valid mobile number (10 to 13 digits).');
+   if(!okMail(v.email))return fail('Enter a valid email address.');
+   if(v.password.length<8)return fail('Password must be at least 8 characters.');
+   if(v.password!==v.confirm)return fail('Passwords do not match.');
+   S.user=await DB.register({first:v.first.trim(),last:v.last.trim(),mobile:v.mobile,email:v.email,password:v.password});await enter();toast('Account created');
+  }
+  else if(id==='fForgot'){
+   if(v.password.length<8)return fail('Password must be at least 8 characters.');
+   await DB.resetPassword(v.email.trim(),v.mobile.replace(/[\s-]/g,''),v.password);S.tab='login';render();toast('Password updated. Please log in.');
+  }
+  else if(id==='fProf'){
+   v.mobile=v.mobile.replace(/[\s-]/g,'');
+   if(!okMob(v.mobile))return fail('Enter a valid mobile number.');if(!okMail(v.email.trim()))return fail('Enter a valid email address.');
+   S.user=await DB.updateProfile({first:v.first.trim(),last:v.last.trim(),mobile:v.mobile,email:v.email.trim()});S.edit=false;render();toast('Profile updated');
+  }
+  else if(id==='fMem'){
+   const n=v.n.trim(),m=$('#mErr');if(!n){m.textContent='Enter a name.';return}
+   if(t.members.some(x=>x.name.toLowerCase()===n.toLowerCase())){m.textContent='That name is already added.';return}
+   t.members.push({id:uid(),name:n});await commit(t);$('#fMem input').focus();
+  }
+  else if(id==='expForm'){
+   const e2=$('#eErr'),desc=v.desc.trim(),amt=Core.toPaise(v.amount),sh=[...f.querySelectorAll('input[name=sh]:checked')].map(i=>i.value);
+   if(t.members.length<2){e2.textContent='Add at least two people first.';return}
+   if(!desc){e2.textContent='Add a short description.';return}
+   if(!amt){e2.textContent='Enter an amount from ₹0.01 to ₹1,00,00,000, with up to 2 decimals.';return}
+   if(!sh.length){e2.textContent='Pick at least one person who shared it.';return}
+   t.expenses.push({id:uid(),desc,amount:amt,payer:v.payer,sharers:sh,date:new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'})});
+   $('#desc').value='';$('#amount').value='';f.querySelectorAll('input[name=sh]').forEach(i=>i.checked=true);await commit(t);toast('Expense added');
+  }
+ }catch(x){fail(x.message);if(!err)toast(x.message)}
+});
+
+(async()=>{
+ try{
+  const u=await DB.session();
+  if(u){S.user=u;S.trips=(await DB.listTrips()).map(norm);S.view='home'}
+  else{const g=sessionStorage.getItem('ss_guest');if(g){S.guest=true;S.cur=norm(JSON.parse(g));S.view='trip'}}
+ }catch(e){}
+ render();
+})();
+})();
+</script>
+</body>
+</html>
