@@ -1,5 +1,5 @@
 # splitshare
-Trip bill splitter in ₹. Add friends, log expenses, see who owes whom, and share the settlement on WhatsApp or email. Guest mode, saved trips and a mobile-friendly UI.
+ SplitShare – Trip Bill Splitter in ₹
 Split trip expenses with friends,see exactly who owes whom,and settle up in rupees.Works in the browser on desktop and mobile,with no install and no ads.
 Status: working prototype. Accounts and trips are currently saved in the browser only (demo backend). A Supabase backend schema is included for the production version.
  Features
