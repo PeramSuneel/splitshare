@@ -1,0 +1,1 @@
+{"hosting": {"site": "peramsuneel-splitshare", "public": "public", "ignore": ["firebase.json", "**/node_modules/**"], "headers": [{"source": "/sw.js", "headers": [{"key": "Cache-Control", "value": "no-cache"}]}]}}
